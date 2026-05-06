@@ -34,7 +34,7 @@ Spring Boot와 Thymeleaf로 만든 개인 블로그입니다.
 ./gradlew bootRun
 ```
 
-```
+```text
 http://localhost:8080
 ```
 
