@@ -1,6 +1,6 @@
 spring:
   application:
-    name: spring-boot-thymeleaf
+    name: blog
 
   # DataSource Configuration
   datasource:
