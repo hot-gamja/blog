@@ -51,12 +51,23 @@ jobs:
       # 5. EC2에 SSH 접속 후 배포
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
           envs: GITHUB_TOKEN,GITHUB_ACTOR,GITHUB_REPOSITORY,DB_HOST,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD
           script: |
+            set -e  # 명령어 실패 시 즉시 중단
+
             # GitHub Container Registry 로그인
             echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
