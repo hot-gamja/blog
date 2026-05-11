@@ -12,8 +12,6 @@ services:
     volumes:
       # Persist database data
       - postgres-data:/var/lib/postgresql
-      # Mount init scripts
-      - ./init-scripts:/docker-entrypoint-initdb.d:ro
     networks:
       - app-network
     healthcheck:

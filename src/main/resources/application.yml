@@ -2,6 +2,11 @@ spring:
   application:
     name: blog
 
+  # Flyway Configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
   # DataSource Configuration
   datasource:
     driver-class-name: org.postgresql.Driver

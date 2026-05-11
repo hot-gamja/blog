@@ -34,6 +34,10 @@ dependencies {
     implementation 'org.postgresql:postgresql'
     runtimeOnly 'com.zaxxer:HikariCP'
 
+    // Flyway
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+
     // Thymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
