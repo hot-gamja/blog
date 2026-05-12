@@ -2,6 +2,11 @@ spring:
   application:
     name: blog
 
+  # Flyway Configuration
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
   # DataSource Configuration
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -33,7 +38,7 @@ spring:
 # MyBatis Configuration
 mybatis:
   mapper-locations: classpath:mappers/**/*.xml
-  type-aliases-package: com.example.model,com.example.photo.domain,com.example.blog.domain
+  type-aliases-package: com.example.blog.domain
   configuration:
     map-underscore-to-camel-case: true
     lazy-loading-enabled: true
@@ -62,10 +67,6 @@ server:
       enabled: true
       force: true
 
-# Photo Upload Configuration
-photo:
-  upload-dir: /home/hot-gamja/uploads/photos
-
 ---
 # Development Profile
 spring:
@@ -82,9 +83,6 @@ spring:
     livereload:
       enabled: true
 
-photo:
-  upload-dir: /home/hot-gamja/uploads/photos
-
 ---
 # Production Profile
 spring:
@@ -100,6 +98,3 @@ spring:
       enabled: false  # 프로덕션에서 불필요
     livereload:
       enabled: false
-
-photo:
-  upload-dir: /opt/myapp/uploads/photos
