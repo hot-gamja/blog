@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.auth.mapper.UserMapper">
+
+    <resultMap id="userResultMap" type="com.example.auth.domain.User">
+        <id property="id" column="id"/>
+        <result property="email" column="email"/>
+        <result property="name" column="name"/>
+        <result property="profileImage" column="profile_image"/>
+        <result property="provider" column="provider"/>
+        <result property="providerId" column="provider_id"/>
+        <result property="role" column="role" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="lastLoginAt" column="last_login_at"/>
+        <result property="deletedAt" column="deleted_at"/>
+    </resultMap>
+
+    <select id="findByProviderAndProviderId" resultMap="userResultMap">
+        SELECT
+            id,
+            email,
+            name,
+            profile_image,
+            provider,
+            provider_id,
+            role,
+            created_at,
+            updated_at,
+            last_login_at,
+            deleted_at
+        FROM users
+        WHERE provider = #{provider}
+          AND provider_id = #{providerId}
+          AND deleted_at IS NULL
+    </select>
+
+    <insert id="save"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="id">
+        INSERT INTO users (email, name, profile_image, provider, provider_id, role)
+        VALUES (#{email}, #{name}, #{profileImage}, #{provider}, #{providerId}, #{role})
+    </insert>
+
+    <update id="updateLastLoginAt">
+        UPDATE users
+        SET last_login_at = NOW(),
+            updated_at    = NOW()
+        WHERE id = #{id}
+          AND deleted_at IS NULL
+    </update>
+
+</mapper>

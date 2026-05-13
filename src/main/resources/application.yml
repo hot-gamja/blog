@@ -20,6 +20,18 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
 
+  # Security OAuth2
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
   # Thymeleaf Configuration
   thymeleaf:
     prefix: classpath:/templates/
@@ -38,7 +50,7 @@ spring:
 # MyBatis Configuration
 mybatis:
   mapper-locations: classpath:mappers/**/*.xml
-  type-aliases-package: com.example.blog.domain
+  type-aliases-package: com.example.blog.domain,com.example.auth.domain
   configuration:
     map-underscore-to-camel-case: true
     lazy-loading-enabled: true
