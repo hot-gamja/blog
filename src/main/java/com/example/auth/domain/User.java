@@ -1,9 +1,11 @@
 package com.example.auth.domain;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 public class User {
 
     private Long id;
