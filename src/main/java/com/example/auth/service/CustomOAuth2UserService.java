@@ -41,9 +41,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (email == null || email.isBlank()) {
             throw new OAuth2AuthenticationException(new OAuth2Error("missing_email"), "Email claim is required");
         }
-        String displayName = name;
-        if (displayName == null || displayName.isBlank()) displayName = email;
-        if (displayName == null || displayName.isBlank()) displayName = providerId;
+        String displayName = (name != null && !name.isBlank()) ? name : email;
 
         Optional<User> found = userMapper.findByProviderAndProviderId(provider, providerId);
         User user;
