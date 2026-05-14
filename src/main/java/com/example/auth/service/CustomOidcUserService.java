@@ -5,14 +5,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.stereotype.Service;
 
 import com.example.auth.domain.User;
@@ -37,6 +36,9 @@ public class CustomOidcUserService extends OidcUserService {
         String name        = oidcUser.getFullName();
         String profileImage = (String) oidcUser.getAttributes().get("picture");
 
+        if (providerId == null || providerId.isBlank()) {
+            throw new OAuth2AuthenticationException(new OAuth2Error("missing_provider_id"), "Provider id claim is required");
+        }
         if (email == null || email.isBlank()) {
             throw new OAuth2AuthenticationException(new OAuth2Error("missing_email"), "Email claim is required");
         }
@@ -53,7 +55,7 @@ public class CustomOidcUserService extends OidcUserService {
         }
 
         Set<GrantedAuthority> authorities = new HashSet<>(oidcUser.getAuthorities());
-        authorities.add(new OidcUserAuthority("ROLE_" + user.getRole().name(), oidcUser.getIdToken(), oidcUser.getUserInfo()));
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
         return new DefaultOidcUser(
                 authorities,
