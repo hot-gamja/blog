@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
@@ -37,18 +38,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String name         = (String) attributes.get("name");
         String profileImage = (String) attributes.get("picture");
 
+        if (email == null || email.isBlank()) {
+            throw new OAuth2AuthenticationException(new OAuth2Error("missing_email"), "Email claim is required");
+        }
+        String displayName = name;
+        if (displayName == null || displayName.isBlank()) displayName = email;
+        if (displayName == null || displayName.isBlank()) displayName = providerId;
+
         Optional<User> found = userMapper.findByProviderAndProviderId(provider, providerId);
         User user;
         if (found.isEmpty()) {
-            user = new User(email, name, profileImage, provider, providerId);
+            user = new User(email, displayName, profileImage, provider, providerId);
             userMapper.save(user);
         } else {
             user = found.get();
             userMapper.updateLastLoginAt(user.getId());
         }
-        String displayName = name;
-        if (displayName == null || displayName.isBlank()) displayName = email;
-        if (displayName == null || displayName.isBlank()) displayName = providerId;
 
         Map<String, Object> displayAttributes = new HashMap<>(attributes);
         displayAttributes.put("displayName", displayName);

@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
@@ -33,10 +34,15 @@ public class CustomOidcUserService extends OidcUserService {
         String name        = oidcUser.getFullName();
         String profileImage = (String) oidcUser.getAttributes().get("picture");
 
+        if (email == null || email.isBlank()) {
+            throw new OAuth2AuthenticationException(new OAuth2Error("missing_email"), "Email claim is required");
+        }
+        String displayName = (name != null && !name.isBlank()) ? name : email;
+
         Optional<User> found = userMapper.findByProviderAndProviderId(provider, providerId);
         User user;
         if (found.isEmpty()) {
-            user = new User(email, name, profileImage, provider, providerId);
+            user = new User(email, displayName, profileImage, provider, providerId);
             userMapper.save(user);
         } else {
             user = found.get();
