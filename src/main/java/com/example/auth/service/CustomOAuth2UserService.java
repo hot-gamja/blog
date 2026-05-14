@@ -1,9 +1,12 @@
 package com.example.auth.service;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
 
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -56,8 +59,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Map<String, Object> displayAttributes = new HashMap<>(attributes);
         displayAttributes.put("displayName", displayName);
 
+        Set<GrantedAuthority> authorities = new HashSet<>(oAuth2User.getAuthorities());
+        authorities.add(new OAuth2UserAuthority("ROLE_" + user.getRole().name(), displayAttributes));
+
         return new DefaultOAuth2User(
-                Set.of(new OAuth2UserAuthority("ROLE_" + user.getRole().name(), displayAttributes)),
+                authorities,
                 displayAttributes,
                 "displayName"
         );
