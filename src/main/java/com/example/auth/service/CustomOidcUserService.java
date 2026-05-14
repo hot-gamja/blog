@@ -61,7 +61,7 @@ public class CustomOidcUserService extends OidcUserService {
                 authorities,
                 oidcUser.getIdToken(),
                 oidcUser.getUserInfo(),
-                "email"
+                "name"
         );
     }
 }
