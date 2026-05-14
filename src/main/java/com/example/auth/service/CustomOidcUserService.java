@@ -1,0 +1,53 @@
+package com.example.auth.service;
+
+import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
+import org.springframework.stereotype.Service;
+
+import com.example.auth.domain.User;
+import com.example.auth.mapper.UserMapper;
+
+@Service
+public class CustomOidcUserService extends OidcUserService {
+
+    private final UserMapper userMapper;
+
+    public CustomOidcUserService(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
+
+    @Override
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+        OidcUser oidcUser = super.loadUser(userRequest);
+
+        String provider    = userRequest.getClientRegistration().getRegistrationId(); // "google"
+        String providerId  = oidcUser.getSubject();
+        String email       = oidcUser.getEmail();
+        String name        = oidcUser.getFullName();
+        String profileImage = (String) oidcUser.getAttributes().get("picture");
+
+        Optional<User> found = userMapper.findByProviderAndProviderId(provider, providerId);
+        User user;
+        if (found.isEmpty()) {
+            user = new User(email, name, profileImage, provider, providerId);
+            userMapper.save(user);
+        } else {
+            user = found.get();
+            userMapper.updateLastLoginAt(user.getId());
+        }
+
+        return new DefaultOidcUser(
+                Set.of(new OidcUserAuthority("ROLE_" + user.getRole().name(), oidcUser.getIdToken(), oidcUser.getUserInfo())),
+                oidcUser.getIdToken(),
+                oidcUser.getUserInfo(),
+                "email"
+        );
+    }
+}
