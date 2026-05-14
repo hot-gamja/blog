@@ -1,44 +1,40 @@
 package com.example.auth.service;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import com.example.auth.domain.User;
 import com.example.auth.mapper.UserMapper;
 
 @Service
-public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+public class CustomOidcUserService extends OidcUserService {
 
     private final UserMapper userMapper;
 
-    public CustomOAuth2UserService(UserMapper userMapper) {
+    public CustomOidcUserService(UserMapper userMapper) {
         this.userMapper = userMapper;
     }
 
     @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
+    public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+        OidcUser oidcUser = super.loadUser(userRequest);
 
-        String provider = userRequest.getClientRegistration().getRegistrationId(); // "google"
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-
-        String providerId   = (String) attributes.get("sub");
-        String email        = (String) attributes.get("email");
-        String name         = (String) attributes.get("name");
-        String profileImage = (String) attributes.get("picture");
+        String provider    = userRequest.getClientRegistration().getRegistrationId(); // "google"
+        String providerId  = oidcUser.getSubject();
+        String email       = oidcUser.getEmail();
+        String name        = oidcUser.getFullName();
+        String profileImage = (String) oidcUser.getAttributes().get("picture");
 
         if (providerId == null || providerId.isBlank()) {
             throw new OAuth2AuthenticationException(new OAuth2Error("missing_provider_id"), "Provider id claim is required");
@@ -58,16 +54,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             userMapper.updateLastLoginAt(user.getId());
         }
 
-        Map<String, Object> displayAttributes = new HashMap<>(attributes);
-        displayAttributes.put("displayName", displayName);
-
-        Set<GrantedAuthority> authorities = new HashSet<>(oAuth2User.getAuthorities());
+        Set<GrantedAuthority> authorities = new HashSet<>(oidcUser.getAuthorities());
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
-        return new DefaultOAuth2User(
+        return new DefaultOidcUser(
                 authorities,
-                displayAttributes,
-                "displayName"
+                oidcUser.getIdToken(),
+                oidcUser.getUserInfo(),
+                "name"
         );
     }
 }
