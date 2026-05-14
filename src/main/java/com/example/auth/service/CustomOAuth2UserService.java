@@ -1,5 +1,6 @@
 package com.example.auth.service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -45,10 +46,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user = found.get();
             userMapper.updateLastLoginAt(user.getId());
         }
+        String displayName = name;
+        if (displayName == null || displayName.isBlank()) displayName = email;
+        if (displayName == null || displayName.isBlank()) displayName = providerId;
+
+        Map<String, Object> displayAttributes = new HashMap<>(attributes);
+        displayAttributes.put("displayName", displayName);
+
         return new DefaultOAuth2User(
-                Set.of(new OAuth2UserAuthority("ROLE_" + user.getRole().name(), attributes)),
-                attributes,
-                "sub"
+                Set.of(new OAuth2UserAuthority("ROLE_" + user.getRole().name(), displayAttributes)),
+                displayAttributes,
+                "displayName"
         );
     }
 }
