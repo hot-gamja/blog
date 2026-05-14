@@ -1,7 +1,10 @@
 package com.example.auth.service;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
 
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
@@ -49,8 +52,11 @@ public class CustomOidcUserService extends OidcUserService {
             userMapper.updateLastLoginAt(user.getId());
         }
 
+        Set<GrantedAuthority> authorities = new HashSet<>(oidcUser.getAuthorities());
+        authorities.add(new OidcUserAuthority("ROLE_" + user.getRole().name(), oidcUser.getIdToken(), oidcUser.getUserInfo()));
+
         return new DefaultOidcUser(
-                Set.of(new OidcUserAuthority("ROLE_" + user.getRole().name(), oidcUser.getIdToken(), oidcUser.getUserInfo())),
+                authorities,
                 oidcUser.getIdToken(),
                 oidcUser.getUserInfo(),
                 "email"
