@@ -103,13 +103,19 @@ const GROUPS = ["해산물", "육류·고기", "면·분식", "한식·기타", 
 document.getElementById('guide-toggle').addEventListener('click', () => {
   const body = document.getElementById('guide-body');
   const arrow = document.getElementById('guide-arrow');
-  body.classList.toggle('open');
+  const isOpen = body.classList.toggle('open');
   arrow.classList.toggle('open');
+  document.getElementById('guide-toggle').setAttribute('aria-expanded', isOpen);
 });
 
 fetch('/data/sokcho.json')
-  .then(r => r.json())
-  .then(data => init(data));
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(data => init(data))
+  .catch(() => {
+    const empty = document.getElementById('empty');
+    empty.textContent = '데이터를 불러오지 못했어요.';
+    empty.classList.remove('hidden');
+  });
 
 function init(data) {
   document.getElementById('count').textContent = data.length;
@@ -161,8 +167,9 @@ function init(data) {
       btn.addEventListener('click', () => {
         const body = btn.closest('.place-card').querySelector('.accordion-body');
         const arrow = btn.querySelector('.accordion-arrow');
-        body.classList.toggle('open');
+        const isOpen = body.classList.toggle('open');
         arrow.classList.toggle('open');
+        btn.setAttribute('aria-expanded', isOpen);
       });
     });
   }
