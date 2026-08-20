@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/site :: layout(~{::content}, ~{::extraHead})}">
+
+<th:block th:fragment="extraHead">
+<style>
+  .place-card { transition: box-shadow 0.15s, transform 0.15s; }
+  .place-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.10); transform: translateY(-1px); }
+  .dark .place-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+  .filter-btn { transition: all 0.15s; cursor: pointer; }
+  .accordion-body { display: none; }
+  .accordion-body.open { display: block; }
+  .accordion-arrow { width: 14px; height: 14px; flex-shrink: 0; transition: transform 0.2s; }
+  .accordion-arrow.open { transform: rotate(180deg); }
+  .accordion-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 500; }
+  .tip-card { transition: box-shadow 0.15s; }
+  .tip-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .dark .tip-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.35); }
+  .note-section { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--color-border); font-size: 0.75rem; line-height: 1.6; color: var(--color-text-secondary); }
+  .menu-section { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+  .menu-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 0.875rem; }
+  .menu-row + .menu-row { margin-top: 6px; }
+  .menu-price { flex-shrink: 0; font-size: 0.75rem; font-variant-numeric: tabular-nums; color: var(--color-text-secondary); }
+  #place-list { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  @media (min-width: 768px) { #place-list { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</th:block>
+
+<th:block th:fragment="content">
+<div>
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold tracking-tight mb-1" style="color: var(--color-text);">속초 맛집</h1>
+    <p class="text-sm" style="color: var(--color-text-secondary);">
+      <span id="count"></span>개 장소
+    </p>
+  </div>
+
+  <!-- 해수우니 구매 가이드 -->
+  <div class="tip-card mb-8 rounded-xl border p-5" style="border-color: var(--color-border); background: var(--color-bg);">
+    <button id="guide-toggle" class="w-full flex items-center justify-between gap-3 text-left">
+      <div>
+        <p class="font-semibold text-sm" style="color: var(--color-text);">해녀할머니 해수우니 구매 가이드</p>
+        <p class="text-xs mt-0.5" style="color: var(--color-text-secondary);">동명항에서 직접 채취한 성게 구매하는 법</p>
+      </div>
+      <svg id="guide-arrow" class="accordion-arrow shrink-0 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-text-secondary);">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </button>
+    <div id="guide-body" class="accordion-body mt-4 pt-4 border-t" style="border-color: var(--color-border);">
+      <ol class="space-y-2.5">
+        <li class="flex gap-3 text-sm">
+          <span class="shrink-0 font-mono text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center" style="background: var(--color-bg-soft); color: var(--color-text);">1</span>
+          <span style="color: var(--color-text);"><strong>010-4790-1712</strong>로 문자로 언제 구매할건지 글 남긴다 <span style="color: var(--color-text-secondary);">(예약 필수)</span></span>
+        </li>
+        <li class="flex gap-3 text-sm">
+          <span class="shrink-0 font-mono text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center" style="background: var(--color-bg-soft); color: var(--color-text);">2</span>
+          <span style="color: var(--color-text);">전화가 오면 방문시간 조율한다</span>
+        </li>
+        <li class="flex gap-3 text-sm">
+          <span class="shrink-0 font-mono text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center" style="background: var(--color-bg-soft); color: var(--color-text);">3</span>
+          <span style="color: var(--color-text);">예약한 시간에 방문해서 구매한다</span>
+        </li>
+        <li class="flex gap-3 text-sm">
+          <span class="shrink-0 font-mono text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center" style="background: var(--color-bg-soft); color: var(--color-text);">4</span>
+          <span style="color: var(--color-text);">동명항 동명활어센터 가기 전 — 속초 홍게 근처에서 할머니 or 아저씨 찾는다</span>
+        </li>
+        <li class="flex gap-3 text-sm">
+          <span class="shrink-0 font-mono text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center" style="background: var(--color-bg-soft); color: var(--color-text);">5</span>
+          <span style="color: var(--color-text);">찾기 어려우면 전화해서 물어본다</span>
+        </li>
+        <li class="flex gap-3 text-sm">
+          <span class="shrink-0 font-mono text-xs font-semibold w-5 h-5 rounded-full flex items-center justify-center" style="background: var(--color-bg-soft); color: var(--color-text);">6</span>
+          <span style="color: var(--color-text);">구매해서 선경분식 김밥 구매후 올려먹기!</span>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 검색 + 필터 -->
+  <div class="mb-8 space-y-3">
+    <input
+      id="search"
+      type="text"
+      placeholder="장소명 또는 메뉴 검색"
+      class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-all"
+      style="background: var(--color-bg-soft); border-color: var(--color-border); color: var(--color-text);"
+      onfocus="this.style.borderColor='var(--color-link)'"
+      onblur="this.style.borderColor='var(--color-border)'"
+    />
+    <div id="filter-btns" class="flex flex-wrap gap-1.5" style="margin-top: 20px;"></div>
+  </div>
+
+  <!-- 장소 그리드 -->
+  <div id="place-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+  <p id="empty" class="hidden text-center py-20 text-sm" style="color: var(--color-text-secondary);">검색 결과가 없어요.</p>
+</div>
+
+<script>
+const GROUPS = ["해산물", "육류·고기", "면·분식", "한식·기타", "카페·디저트", "기타"];
+
+// Guide accordion
+document.getElementById('guide-toggle').addEventListener('click', () => {
+  const body = document.getElementById('guide-body');
+  const arrow = document.getElementById('guide-arrow');
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+});
+
+fetch('/data/sokcho.json')
+  .then(r => r.json())
+  .then(data => init(data));
+
+function init(data) {
+  document.getElementById('count').textContent = data.length;
+
+  const container = document.getElementById('filter-btns');
+
+  function makeBtn(label, isAll) {
+    const btn = document.createElement('button');
+    btn.dataset.group = label;
+    btn.className = 'filter-btn px-3 py-1 rounded-full text-xs font-medium border';
+    setActive(btn, isAll);
+    btn.textContent = label;
+    container.appendChild(btn);
+  }
+
+  makeBtn('전체', true);
+  GROUPS.forEach(g => { if (data.some(p => p.group === g)) makeBtn(g, false); });
+
+  let activeGroup = '전체';
+  let searchQuery = '';
+
+  function setActive(btn, active) {
+    btn.style.background = active ? 'var(--color-text)' : 'transparent';
+    btn.style.color = active ? 'var(--color-bg)' : 'var(--color-text-secondary)';
+    btn.style.borderColor = active ? 'var(--color-text)' : 'var(--color-border)';
+  }
+
+  function render() {
+    const list = document.getElementById('place-list');
+    const empty = document.getElementById('empty');
+    const q = searchQuery.toLowerCase();
+
+    const filtered = data
+      .filter(p => {
+        const matchGroup = activeGroup === '전체' || p.group === activeGroup;
+        const matchSearch = !q
+          || p.name.toLowerCase().includes(q)
+          || p.category.toLowerCase().includes(q)
+          || p.menus.some(m => m.name.toLowerCase().includes(q));
+        return matchGroup && matchSearch;
+      })
+      .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+    list.innerHTML = filtered.map((p, i) => placeCard(p, i)).join('');
+    empty.classList.toggle('hidden', filtered.length > 0);
+    list.classList.toggle('hidden', filtered.length === 0);
+
+    list.querySelectorAll('.accordion-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const body = btn.closest('.place-card').querySelector('.accordion-body');
+        const arrow = btn.querySelector('.accordion-arrow');
+        body.classList.toggle('open');
+        arrow.classList.toggle('open');
+      });
+    });
+  }
+
+  container.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    activeGroup = btn.dataset.group;
+    container.querySelectorAll('.filter-btn').forEach(b => setActive(b, b.dataset.group === activeGroup));
+    render();
+  });
+
+  document.getElementById('search').addEventListener('input', e => {
+    searchQuery = e.target.value;
+    render();
+  });
+
+  render();
+}
+
+function scoreBar(score) {
+  if (!score) return '';
+  const filled = Math.round(score);
+  const stars = '★'.repeat(filled) + '☆'.repeat(5 - filled);
+  return `<span class="font-mono text-xs tracking-widest" style="color: var(--color-link);">${stars}</span>
+          <span class="text-xs font-medium" style="color: var(--color-text);">${score.toFixed(1)}</span>`;
+}
+
+function placeCard(p, idx) {
+  const menuCount = p.menus.length;
+  const convKey = ['주차', '포장', '예약', '배달'];
+  const keyConv = p.conveniences.filter(c => convKey.some(k => c.includes(k)));
+
+  const mapBtn = p.link
+    ? `<a href="${p.link}" target="_blank" rel="noopener noreferrer"
+         class="shrink-0 text-xs px-2.5 py-1 rounded-md border transition-colors"
+         style="color: var(--color-text-secondary); border-color: var(--color-border);"
+         onmouseover="this.style.borderColor='var(--color-text)'; this.style.color='var(--color-text)'"
+         onmouseout="this.style.borderColor='var(--color-border)'; this.style.color='var(--color-text-secondary)'">
+        지도
+       </a>`
+    : '';
+
+  const noteSection = p.note ? `
+    <div class="note-section">${p.note}</div>` : '';
+
+  const menuSection = menuCount > 0 ? `
+    <div class="menu-section">
+      <button class="accordion-toggle" style="color: var(--color-text-secondary);">
+        <span>메뉴 ${menuCount}개</span>
+        <svg class="accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+      <div class="accordion-body" style="margin-top:8px;">
+        ${p.menus.map(m => `
+          <div class="menu-row">
+            <div>
+              <span style="color: var(--color-text);">${m.name}</span>
+              ${m.description ? `<p style="font-size:0.7rem; margin-top:1px; color: var(--color-text-secondary);">${m.description}</p>` : ''}
+            </div>
+            <span class="menu-price">${m.price || '—'}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="place-card rounded-xl border p-5 flex flex-col gap-2" style="border-color: var(--color-border); background: var(--color-bg);">
+
+      <!-- 상단: 이름 + 지도 링크 -->
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="font-semibold text-base leading-snug truncate" style="color: var(--color-text);">${p.name}</p>
+          <p class="text-xs mt-0.5" style="color: var(--color-text-secondary);">${p.category}</p>
+        </div>
+        ${mapBtn}
+      </div>
+
+      <!-- 리뷰 점수 -->
+      ${p.score ? `
+      <div class="flex items-center gap-1.5">
+        ${scoreBar(p.score)}
+        ${p.reviewCount ? `<span class="text-xs" style="color: var(--color-text-secondary);">리뷰 ${p.reviewCount.toLocaleString()}개</span>` : ''}
+      </div>` : ''}
+
+      <!-- 영업시간 + 주소 -->
+      <div class="text-xs space-y-0.5" style="color: var(--color-text-secondary);">
+        ${p.hours ? `<p>${p.hours}</p>` : ''}
+        ${p.roadAddress ? `<p class="truncate">${p.roadAddress}</p>` : ''}
+      </div>
+
+      <!-- 편의시설 핵심만 -->
+      ${keyConv.length ? `
+      <div class="flex flex-wrap gap-1">
+        ${keyConv.map(c => `<span class="text-xs px-1.5 py-0.5 rounded" style="background: var(--color-bg-soft); color: var(--color-text-secondary);">${c}</span>`).join('')}
+      </div>` : ''}
+
+      <!-- 가게 설명 -->
+      ${p.description ? `<p style="font-size:0.72rem; line-height:1.55; color: var(--color-text-secondary); margin-top:4px;">${p.description.replace(/\n/g, ' ').slice(0, 120)}${p.description.length > 120 ? '…' : ''}</p>` : ''}
+
+      <!-- 개인 후기 -->
+      ${noteSection}
+
+      ${menuSection}
+    </div>
+  `;
+}
+</script>
+</th:block>
+</html>
