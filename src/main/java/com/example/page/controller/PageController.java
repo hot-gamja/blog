@@ -18,4 +18,10 @@ public class PageController {
         model.addAttribute("pageTitle", "About - Hot Gamja Lab");
         return "about";
     }
+
+    @GetMapping("/sokcho")
+    public String sokcho(Model model) {
+        model.addAttribute("pageTitle", "속초 맛집 - Hot Gamja Lab");
+        return "sokcho/index";
+    }
 }
