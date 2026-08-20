@@ -39,7 +39,7 @@
 
   <!-- 해수우니 구매 가이드 -->
   <div class="tip-card mb-8 rounded-xl border p-5" style="border-color: var(--color-border); background: var(--color-bg);">
-    <button id="guide-toggle" class="w-full flex items-center justify-between gap-3 text-left">
+    <button id="guide-toggle" type="button" aria-expanded="false" aria-controls="guide-body" class="w-full flex items-center justify-between gap-3 text-left">
       <div>
         <p class="font-semibold text-sm" style="color: var(--color-text);">해녀할머니 해수우니 구매 가이드</p>
         <p class="text-xs mt-0.5" style="color: var(--color-text-secondary);">동명항에서 직접 채취한 성게 구매하는 법</p>
@@ -83,6 +83,7 @@
     <input
       id="search"
       type="text"
+      aria-label="장소명 또는 메뉴 검색"
       placeholder="장소명 또는 메뉴 검색"
       class="w-full px-4 py-2.5 rounded-lg border text-sm outline-none transition-all"
       style="background: var(--color-bg-soft); border-color: var(--color-border); color: var(--color-text);"
@@ -219,13 +220,13 @@ function placeCard(p, idx) {
 
   const menuSection = menuCount > 0 ? `
     <div class="menu-section">
-      <button class="accordion-toggle" style="color: var(--color-text-secondary);">
+      <button type="button" class="accordion-toggle" aria-expanded="false" aria-controls="menu-${idx}" style="color: var(--color-text-secondary);">
         <span>메뉴 ${menuCount}개</span>
         <svg class="accordion-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
-      <div class="accordion-body" style="margin-top:8px;">
+      <div id="menu-${idx}" class="accordion-body" style="margin-top:8px;">
         ${p.menus.map(m => `
           <div class="menu-row">
             <div>
