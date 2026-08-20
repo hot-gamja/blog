@@ -3,6 +3,7 @@
       th:replace="~{layout/site :: layout(~{::content}, ~{::extraHead})}">
 
 <th:block th:fragment="extraHead">
+<meta name="robots" content="noindex, nofollow">
 <style>
   .place-card { transition: box-shadow 0.15s, transform 0.15s; }
   .place-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.10); transform: translateY(-1px); }
