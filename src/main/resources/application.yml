@@ -111,3 +111,6 @@ spring:
       enabled: false  # 프로덕션에서 불필요
     livereload:
       enabled: false
+
+server:
+  forward-headers-strategy: framework
