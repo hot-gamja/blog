@@ -57,11 +57,13 @@ public class CustomOidcUserService extends OidcUserService {
         Set<GrantedAuthority> authorities = new HashSet<>(oidcUser.getAuthorities());
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
+        String nameAttributeKey = (name != null && !name.isBlank()) ? "name" : "email";
+
         return new DefaultOidcUser(
                 authorities,
                 oidcUser.getIdToken(),
                 oidcUser.getUserInfo(),
-                "name"
+                nameAttributeKey
         );
     }
 }
