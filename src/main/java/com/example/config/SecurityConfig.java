@@ -26,6 +26,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/**").authenticated()
+                .requestMatchers("/sokcho").hasRole("ADMIN")
                 .anyRequest().permitAll()
             )
             .oauth2Login(oauth2 -> oauth2
