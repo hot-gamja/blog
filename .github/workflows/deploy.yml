@@ -65,7 +65,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
@@ -75,17 +74,21 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
-          envs: GITHUB_TOKEN,GITHUB_ACTOR,GITHUB_REPOSITORY,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
+          envs: GITHUB_TOKEN,GITHUB_ACTOR,GITHUB_REPOSITORY,DB_NAME,DB_USER,DB_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
             set -e  # 명령어 실패 시 즉시 중단
 
             # GitHub Container Registry 로그인
             echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
-            # compose가 참조할 .env 파일 생성
+            # compose 전환 전 기존 standalone 컨테이너 정리
+            docker stop blog || true
+            docker rm blog || true
+
+            # compose가 참조할 .env 파일 생성 (소유자만 읽기 가능)
+            install -m 600 /dev/null /opt/myapp/.env
             cat > /opt/myapp/.env <<EOF
             GITHUB_REPOSITORY=$GITHUB_REPOSITORY
-            DB_PORT=$DB_PORT
             DB_NAME=$DB_NAME
             DB_USER=$DB_USER
             DB_PASSWORD=$DB_PASSWORD
