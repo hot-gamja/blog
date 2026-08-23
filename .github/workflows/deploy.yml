@@ -48,14 +48,23 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # 5. EC2에 SSH 접속 후 배포
+      # 5. docker-compose.prod.yml을 EC2에 복사
+      - name: Copy compose file to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          source: docker-compose.prod.yml
+          target: /opt/myapp
+
+      # 6. EC2에 SSH 접속 후 배포
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USER: ${{ secrets.DB_USER }}
@@ -66,33 +75,26 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
-          envs: GITHUB_TOKEN,GITHUB_ACTOR,GITHUB_REPOSITORY,DB_HOST,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
+          envs: GITHUB_TOKEN,GITHUB_ACTOR,GITHUB_REPOSITORY,DB_PORT,DB_NAME,DB_USER,DB_PASSWORD,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
             set -e  # 명령어 실패 시 즉시 중단
 
             # GitHub Container Registry 로그인
             echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
 
-            # 최신 이미지 pull
-            docker pull ghcr.io/$GITHUB_REPOSITORY:latest
+            # compose가 참조할 .env 파일 생성
+            cat > /opt/myapp/.env <<EOF
+            GITHUB_REPOSITORY=$GITHUB_REPOSITORY
+            DB_PORT=$DB_PORT
+            DB_NAME=$DB_NAME
+            DB_USER=$DB_USER
+            DB_PASSWORD=$DB_PASSWORD
+            GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+            EOF
 
-            # 기존 컨테이너 종료 및 삭제
-            docker stop blog || true
-            docker rm blog || true
-
-            # 새 컨테이너 실행
-            docker run -d \
-              --name blog \
-              --restart always \
-              -p 8080:8080 \
-              -e DB_HOST=$DB_HOST \
-              -e DB_PORT=$DB_PORT \
-              -e DB_NAME=$DB_NAME \
-              -e DB_USER=$DB_USER \
-              -e DB_PASSWORD=$DB_PASSWORD \
-              -e GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID \
-              -e GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET \
-              -v /opt/myapp/uploads:/opt/myapp/uploads \
-              ghcr.io/$GITHUB_REPOSITORY:latest
+            # 최신 이미지 pull 후 변경된 서비스만 재시작
+            docker compose -f /opt/myapp/docker-compose.prod.yml --env-file /opt/myapp/.env pull
+            docker compose -f /opt/myapp/docker-compose.prod.yml --env-file /opt/myapp/.env up -d
 
             echo "Deploy complete!"
