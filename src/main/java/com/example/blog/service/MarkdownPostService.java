@@ -3,7 +3,11 @@ package com.example.blog.service;
 import com.example.blog.domain.PostMeta;
 import com.example.blog.domain.RenderedPost;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
+import com.vladsch.flexmark.ext.anchorlink.AnchorLinkExtension;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
+import com.vladsch.flexmark.ext.emoji.EmojiExtension;
+import com.vladsch.flexmark.ext.emoji.EmojiImageType;
+import com.vladsch.flexmark.ext.footnotes.FootnoteExtension;
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
 import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
@@ -55,11 +59,15 @@ public class MarkdownPostService {
         this.sanitizerService = sanitizerService;
 
         MutableDataSet options = new MutableDataSet();
+        options.set(EmojiExtension.USE_IMAGE_TYPE, EmojiImageType.UNICODE_ONLY);
         options.set(Parser.EXTENSIONS, List.of(
                 TablesExtension.create(),
                 StrikethroughExtension.create(),
                 TaskListExtension.create(),
-                AutolinkExtension.create()
+                AutolinkExtension.create(),
+                FootnoteExtension.create(),
+                EmojiExtension.create(),
+                AnchorLinkExtension.create()
         ));
         this.markdownParser = Parser.builder(options).build();
         this.htmlRenderer = HtmlRenderer.builder(options)
