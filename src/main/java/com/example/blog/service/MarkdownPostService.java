@@ -3,6 +3,9 @@ package com.example.blog.service;
 import com.example.blog.domain.PostMeta;
 import com.example.blog.domain.RenderedPost;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
+import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
+import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.html.AttributeProvider;
 import com.vladsch.flexmark.html.HtmlRenderer;
@@ -52,7 +55,12 @@ public class MarkdownPostService {
         this.sanitizerService = sanitizerService;
 
         MutableDataSet options = new MutableDataSet();
-        options.set(Parser.EXTENSIONS, List.of(TablesExtension.create()));
+        options.set(Parser.EXTENSIONS, List.of(
+                TablesExtension.create(),
+                StrikethroughExtension.create(),
+                TaskListExtension.create(),
+                AutolinkExtension.create()
+        ));
         this.markdownParser = Parser.builder(options).build();
         this.htmlRenderer = HtmlRenderer.builder(options)
                 .attributeProviderFactory(new CodeLanguageAttributeProvider.Factory())
