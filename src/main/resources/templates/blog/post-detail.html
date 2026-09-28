@@ -67,6 +67,32 @@
                 });
             </script>
             </th:block>
+
+            <!-- KaTeX: only loaded when this post actually contains a $ character -->
+            <th:block th:if="${hasMath}">
+            <link rel="stylesheet" th:href="@{/vendor/katex/katex.min.css}">
+            <script defer th:src="@{/vendor/katex/katex.min.js}"></script>
+            <script defer th:src="@{/vendor/katex/contrib/auto-render.min.js}"></script>
+            <script defer>
+                document.addEventListener('DOMContentLoaded', function () {
+                    if (!window.renderMathInElement) return;
+                    var article = document.querySelector('.reading .prose');
+                    if (!article) return;
+                    window.renderMathInElement(article, {
+                        // $...$ (not \(...\)): CommonMark's backslash-escape rule strips
+                        // \( \) before KaTeX ever sees them, since ( and ) are escapable
+                        // punctuation. $...$ has the known GitHub tradeoff instead: two
+                        // bare prices in one sentence (e.g. "$5, storage is $10") can be
+                        // misread as one math span. See docs/blog/markdown-extensions.md.
+                        delimiters: [
+                            { left: '$$', right: '$$', display: true },
+                            { left: '$', right: '$', display: false }
+                        ],
+                        throwOnError: false
+                    });
+                });
+            </script>
+            </th:block>
         </th:block>
         <section>
             <!-- Back to blog -->

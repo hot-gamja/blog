@@ -6,12 +6,14 @@
     "build": "npx tailwindcss -i ./src/main/resources/static/src/input.css -o ./src/main/resources/static/css/app.css --minify",
     "copy:hljs": "mkdir -p src/main/resources/static/vendor/hljs/styles && cp node_modules/@highlightjs/cdn-assets/highlight.min.js src/main/resources/static/vendor/hljs/ && cp node_modules/@highlightjs/cdn-assets/styles/github.min.css src/main/resources/static/vendor/hljs/styles/ && cp node_modules/@highlightjs/cdn-assets/styles/github-dark.min.css src/main/resources/static/vendor/hljs/styles/",
     "copy:mermaid": "mkdir -p src/main/resources/static/vendor/mermaid && cp node_modules/mermaid/dist/mermaid.min.js src/main/resources/static/vendor/mermaid/",
-    "postinstall": "npm run copy:hljs && npm run copy:mermaid"
+    "copy:katex": "mkdir -p src/main/resources/static/vendor/katex/contrib src/main/resources/static/vendor/katex/fonts && cp node_modules/katex/dist/katex.min.js node_modules/katex/dist/katex.min.css src/main/resources/static/vendor/katex/ && cp node_modules/katex/dist/contrib/auto-render.min.js src/main/resources/static/vendor/katex/contrib/ && cp node_modules/katex/dist/fonts/* src/main/resources/static/vendor/katex/fonts/",
+    "postinstall": "npm run copy:hljs && npm run copy:mermaid && npm run copy:katex"
   },
   "devDependencies": {
     "@highlightjs/cdn-assets": "^11.11.1",
     "@tailwindcss/typography": "^0.5.16",
     "autoprefixer": "^10.4.21",
+    "katex": "^0.18.9",
     "mermaid": "^12.0.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17"

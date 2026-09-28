@@ -43,6 +43,7 @@ public class PostController {
         model.addAttribute("post", meta);
         model.addAttribute("postHtml", html);
         model.addAttribute("hasMermaid", html != null && html.contains("language-mermaid"));
+        model.addAttribute("hasMath", html != null && html.contains("$"));
         model.addAttribute("relatedPosts", relatedPosts);
         model.addAttribute("pageTitle", meta.getTitle() + " - HOT GAMJA LAB");
 
