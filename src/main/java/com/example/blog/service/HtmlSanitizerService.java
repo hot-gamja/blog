@@ -17,12 +17,13 @@ public class HtmlSanitizerService {
                         "ul", "ol", "li",
                         "a", "img",
                         "code", "pre", "blockquote",
-                        "strong", "em", "b", "i", "del", "s",
+                        "strong", "em", "b", "i", "del", "s", "ins",
                         "table", "thead", "tbody", "tfoot", "tr", "th", "td",
                         "div", "span",
                         "dl", "dt", "dd",
                         "sup", "sub",
-                        "input"
+                        "input",
+                        "details", "summary"
                 )
                 .allowUrlProtocols("https", "http", "mailto")
                 .allowAttributes("href").onElements("a")
@@ -30,6 +31,7 @@ public class HtmlSanitizerService {
                 .allowAttributes("src", "alt", "width", "height", "loading").onElements("img")
                 .allowAttributes("class", "id").globally()
                 .allowAttributes("type", "checked", "disabled").onElements("input")
+                .allowAttributes("open").onElements("details")
                 .allowAttributes("align").onElements("td", "th")
                 .allowAttributes("colspan", "rowspan").onElements("td", "th")
                 .toFactory();

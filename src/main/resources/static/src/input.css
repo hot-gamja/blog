@@ -126,6 +126,12 @@
     margin-bottom: 0.5em;
   }
 
+  /* Heading anchor links (flexmark ext-anchorlink wraps the whole heading text) */
+  .reading .prose :where(h1, h2, h3, h4) :where(a) {
+    color: inherit;
+    text-decoration: none;
+  }
+
   /* Links in reading */
   .reading .prose :where(a) {
     color: var(--color-link);
