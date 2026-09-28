@@ -38,9 +38,11 @@ public class PostController {
             relatedPosts = markdownPostService.getRelatedPosts(meta.getCategory(), slug, 3);
         }
 
+        String html = post.getHtml();
+
         model.addAttribute("post", meta);
-        model.addAttribute("postHtml", post.getHtml());
-        model.addAttribute("hasMermaid", post.getHtml().contains("language-mermaid"));
+        model.addAttribute("postHtml", html);
+        model.addAttribute("hasMermaid", html != null && html.contains("language-mermaid"));
         model.addAttribute("relatedPosts", relatedPosts);
         model.addAttribute("pageTitle", meta.getTitle() + " - HOT GAMJA LAB");
 
