@@ -127,7 +127,8 @@
   }
 
   /* Heading anchor links (flexmark ext-anchorlink wraps the whole heading text) */
-  .reading .prose :where(h1, h2, h3, h4) :where(a) {
+  /* Plain `a` (not :where(a)) so this outranks the later .reading .prose :where(a) rule */
+  .reading .prose :where(h1, h2, h3, h4) a {
     color: inherit;
     text-decoration: none;
   }
